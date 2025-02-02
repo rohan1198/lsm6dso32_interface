@@ -13,7 +13,6 @@
 
 namespace lsm6dso32 {
 
-// Implementation class (PIMPL)
 class LSM6DSO32::Impl {
 public:
     Impl(const std::string& device_path, uint8_t address) 
@@ -306,7 +305,6 @@ private:
     ImuData last_known_data{};  // Initialize all members to 0
 };
 
-// Main class implementation (delegates to PIMPL)
 LSM6DSO32::LSM6DSO32(const std::string& device_path, uint8_t address)
     : pimpl_(std::make_unique<Impl>(device_path, address)) {
 }

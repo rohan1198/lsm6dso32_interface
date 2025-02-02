@@ -17,23 +17,18 @@ public:
     virtual ~ImuNode();
 
 private:
-    // ROS 2 parameters
     std::string device_path_;
     std::string frame_id_;
     double publish_rate_;
     bool publish_tf_;
 
-    // IMU driver
     std::unique_ptr<lsm6dso32::LSM6DSO32> imu_;
     
-    // Publishers
     rclcpp::Publisher<sensor_msgs::msg::Imu>::SharedPtr imu_pub_;
     std::unique_ptr<tf2_ros::TransformBroadcaster> tf_broadcaster_;
 
-    // Timer for publishing data
     rclcpp::TimerBase::SharedPtr timer_;
 
-    // Methods
     void initializeParameters();
     void initializePublishers();
     void initializeIMU();

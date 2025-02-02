@@ -16,7 +16,6 @@ ImuNode::ImuNode(const rclcpp::NodeOptions & options)
         initializeIMU();
         initializePublishers();
         
-        // Create timer for publishing data
         timer_ = this->create_wall_timer(
             std::chrono::duration<double>(1.0 / publish_rate_),
             std::bind(&ImuNode::publishData, this));
@@ -37,7 +36,6 @@ ImuNode::~ImuNode()
 
 void ImuNode::initializeParameters()
 {
-    // Declare and get parameters
     this->declare_parameter("device_path", "/dev/i2c-1");
     this->declare_parameter("frame_id", "imu_link");
     this->declare_parameter("publish_rate", 200.0);
@@ -54,7 +52,6 @@ void ImuNode::initializeParameters()
 
 void ImuNode::initializePublishers()
 {
-    // Create IMU message publisher with reliable QoS
     auto qos = rclcpp::QoS(rclcpp::KeepLast(10))
         .reliable()
         .durability_volatile();
@@ -91,11 +88,9 @@ void ImuNode::publishData()
     try {
         auto data = imu_->getLatestData();
         
-        // Create and publish IMU message
         auto imu_msg = createImuMessage(data);
         imu_pub_->publish(imu_msg);
 
-        // Publish transform if enabled
         if (publish_tf_) {
             auto transform_msg = createTransformMessage(data);
             tf_broadcaster_->sendTransform(transform_msg);
@@ -113,21 +108,17 @@ sensor_msgs::msg::Imu ImuNode::createImuMessage(const lsm6dso32::ImuData& data)
 {
     sensor_msgs::msg::Imu msg;
     
-    // Set header
     msg.header.stamp = this->now();
     msg.header.frame_id = frame_id_;
 
-    // Set linear acceleration (m/s^2)
     msg.linear_acceleration.x = data.accel[0];
     msg.linear_acceleration.y = data.accel[1];
     msg.linear_acceleration.z = data.accel[2];
 
-    // Set angular velocity (rad/s)
     msg.angular_velocity.x = data.gyro[0];
     msg.angular_velocity.y = data.gyro[1];
     msg.angular_velocity.z = data.gyro[2];
 
-    // Set covariance matrices (example values - should be calibrated)
     double linear_accel_stdev = 0.0003; // Example: 0.3 mg
     double angular_vel_stdev = 0.0001;  // Example: 0.1 deg/s
     
@@ -144,7 +135,6 @@ sensor_msgs::msg::Imu ImuNode::createImuMessage(const lsm6dso32::ImuData& data)
     msg.angular_velocity_covariance[4] = 
     msg.angular_velocity_covariance[8] = angular_vel_stdev * angular_vel_stdev;
 
-    // Orientation not provided by this IMU
     msg.orientation_covariance[0] = -1;
 
     return msg;
@@ -156,13 +146,13 @@ geometry_msgs::msg::TransformStamped ImuNode::createTransformMessage(
     geometry_msgs::msg::TransformStamped transform;
     
     transform.header.stamp = this->now();
-    transform.header.frame_id = "base_link";  // Parent frame
-    transform.child_frame_id = frame_id_;     // IMU frame
+    transform.header.frame_id = "base_link";
+    transform.child_frame_id = frame_id_;
 
     // Set translation (if mounted with offset from base_link)
-    transform.transform.translation.x = 0.0;  // Adjust these values based on
-    transform.transform.translation.y = 0.0;  // your IMU mounting position
-    transform.transform.translation.z = 0.0;  // relative to base_link
+    transform.transform.translation.x = 0.0;
+    transform.transform.translation.y = 0.0;
+    transform.transform.translation.z = 0.0;
 
     // Set rotation (identity quaternion since we don't have orientation)
     transform.transform.rotation.w = 1.0;

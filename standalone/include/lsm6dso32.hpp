@@ -30,7 +30,7 @@ class LSM6DSO32 {
 public:
     /**
      * @brief Constructor
-     * @param device_path Path to I2C device (e.g., "/dev/i2c-1")
+     * @param device_path Path to I2C device
      * @param address I2C address of the device (default: 0x6A)
      */
     explicit LSM6DSO32(const std::string& device_path, 
@@ -124,7 +124,6 @@ public:
     std::string getLastError() const;
 
 private:
-    // Private implementation details
     class Impl;
     std::unique_ptr<Impl> pimpl_;
 
@@ -137,7 +136,6 @@ private:
     LSM6DSO32& operator=(LSM6DSO32&&) = default;
 };
 
-// Exception classes
 class ImuxException : public std::runtime_error {
 public:
     explicit ImuxException(const std::string& msg) : std::runtime_error(msg) {}

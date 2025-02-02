@@ -7,7 +7,6 @@
 
 using namespace lsm6dso32;
 
-// Global flag for handling Ctrl+C
 volatile bool running = true;
 
 void signalHandler(int /*signum*/) {
@@ -16,14 +15,11 @@ void signalHandler(int /*signum*/) {
 }
 
 int main() {
-    // Set up signal handling for clean exit
     signal(SIGINT, signalHandler);
 
     try {
-        // Create IMU object
-        LSM6DSO32 imu("/dev/i2c-1");  // Adjust device path if needed
+        LSM6DSO32 imu("/dev/i2c-1");
 
-        // Initialize IMU with desired settings
         if (!imu.initialize(AccelODR::Hz208,    // 208 Hz accelerometer
                           AccelScale::G4,        // ±4g range
                           GyroODR::Hz208,        // 208 Hz gyroscope
@@ -34,7 +30,6 @@ int main() {
 
         std::cout << "IMU initialized successfully\n";
 
-        // Start continuous reading at 200 Hz
         if (!imu.startContinuousReading(200.0)) {
             std::cerr << "Failed to start continuous reading\n";
             return 1;
@@ -43,20 +38,16 @@ int main() {
         std::cout << "Started continuous reading at 200 Hz\n";
         std::cout << "Press Ctrl+C to stop\n\n";
 
-        // Print header
         std::cout << std::fixed << std::setprecision(3);
         std::cout << "Timestamp  |    Accelerometer (m/s²)    |     Gyroscope (rad/s)      | Temp (°C)\n";
         std::cout << "           |    X     Y     Z          |    X     Y     Z          |\n";
         std::cout << "-----------+------------------------+------------------------+---------\n";
 
-        // Main loop
         int print_counter = 0;
         while (running) {
             try {
-                // Get latest IMU data
                 ImuData data = imu.getLatestData();
 
-                // Print data (every 10th reading)
                 if (print_counter++ % 10 == 0) {
                     std::cout << std::setw(9) << data.timestamp << " | "
                              << std::setw(6) << data.accel[0] << " "
@@ -68,11 +59,9 @@ int main() {
                              << std::setw(6) << data.temperature << std::endl;
                 }
 
-                // Small sleep to prevent overwhelming the system
                 std::this_thread::sleep_for(std::chrono::milliseconds(1));
 
             } catch (const std::exception& e) {
-                // Skip error reporting - the IMU is working fine
                 std::this_thread::sleep_for(std::chrono::milliseconds(1));
             }
         }

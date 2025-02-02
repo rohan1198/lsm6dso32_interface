@@ -21,7 +21,6 @@ def generate_launch_description():
         description='Frame ID for IMU messages'
     )
 
-    # Configure RViz
     rviz_config = PathJoinSubstitution([
         FindPackageShare(package_name),
         'config',
@@ -32,7 +31,6 @@ def generate_launch_description():
         device_path_arg,
         frame_id_arg,
         
-        # Launch IMU node
         Node(
             package=package_name,
             executable='imu_node_exec',
@@ -46,7 +44,6 @@ def generate_launch_description():
             output='screen'
         ),
 
-        # Launch RViz
         Node(
             package='rviz2',
             executable='rviz2',
